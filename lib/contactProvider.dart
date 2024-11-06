@@ -22,21 +22,30 @@ class ContactProvider {
                                     """
                                     CREATE TABLE Contactos
                                     (
-                                    _id TEXT,
-                                    nombre TEXT,
-                                    apellidos TEXT,
-                                    email TEXT,
-                                    telefono TEXT
+                                      _id TEXT,
+                                      nombre TEXT,
+                                      apellidos TEXT,
+                                      email TEXT,
+                                      telefono TEXT,
+                                      sincronizado TEXT
                                     );
                                     """
                                   );
-                               }, version: 1 );
+                               }, version: 2 );
   }
 
 
   Future<ContactResponseModel> obtenerContactos() async{
     var results = await this.db!.rawQuery("""
         SELECT * FROM Contactos ORDER BY apellidos, nombre
+        """);
+    ContactResponseModel response = ContactResponseModel.fromDB(results);
+    return response;
+  }
+
+  Future<ContactResponseModel> obtenerContactosNoSincornizados() async{
+    var results = await this.db!.rawQuery("""
+        SELECT * FROM Contactos WHERE sincronizado = '0'
         """);
     ContactResponseModel response = ContactResponseModel.fromDB(results);
     return response;
@@ -50,6 +59,12 @@ class ContactProvider {
         contacto.id, contacto.nombre, contacto.apellidos,
         contacto.email, contacto.telefono
       ]);
+  }
+
+  Future<void> marcarSincronizados() async{
+    await this.db!.rawUpdate("""
+      UPDATE Contactos SET sincronizado = '1'
+    """);
   }
 
 

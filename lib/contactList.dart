@@ -2,6 +2,10 @@ import 'package:agendadecontactos/contactProvider.dart';
 import 'package:agendadecontactos/contactResponseModel.dart';
 import 'package:flutter/material.dart';
 
+import 'dart:async';
+import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:agendadecontactos/contactProviderAPI.dart';
+
 class ContactList extends StatefulWidget{
   @override
   State<StatefulWidget> createState(){
@@ -12,6 +16,23 @@ class ContactList extends StatefulWidget{
 class _ContactList extends State<ContactList>{
 
   List<Widget> listadoContactos = <Widget>[];
+  Connectivity _connectivity = Connectivity();
+  late StreamSubscription<ConnectivityResult> _connectivitySubscription;
+
+  @override
+  void initState(){
+    super.initState();
+    _connectivitySubscription = Connectivity().onConnectivityChanged
+                                              .listen( (ConnectivityResult result){
+                                                if(result == ConnectivityResult.mobile 
+                                                  || result == ConnectivityResult.wifi ){
+                                                    sincronizarContactos();
+                                                  }
+                                              }
+                                              );
+  }
+
+
   @override
   Widget build(BuildContext context) {
     obtenerContactos();
@@ -55,4 +76,23 @@ class _ContactList extends State<ContactList>{
       this.listadoContactos = contactosAMostrar;
     });
   }
+  
+  void sincronizarContactos() async {
+    ContactProvider providerDB = ContactProvider();
+    ContactProviderAPI providerAPI = ContactProviderAPI();
+
+    await providerDB.init();
+
+
+    ContactResponseModel contactosPendientes = await providerDB.obtenerContactosNoSincornizados();
+
+    for (int i = 0; i < contactosPendientes.listaContactos.length; i++){
+      String respuesta = await providerAPI.crearContacto(contactosPendientes.listaContactos[i]);
+    }
+
+    await providerDB.marcarSincronizados();
+    
+  }
+
+  
 }

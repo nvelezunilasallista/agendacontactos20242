@@ -115,7 +115,7 @@ class _CreateContact extends State<CreateContact> {
 
   crearContactoenBaseDatos() async{
     ContactModel contact = 
-    ContactModel.fromValues("", nombre, apellidos, email, telefono);
+    ContactModel.fromValues("", nombre, apellidos, email, telefono, "0");
     ContactProvider provider = ContactProvider();
     await provider.init();
     var id = await provider.agregarContacto(contact);

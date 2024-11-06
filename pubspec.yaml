@@ -7,6 +7,9 @@ environment:
   sdk: '>=3.4.4 <4.0.0'
 
 dependencies:
+  connectivity_plus: ^2.0.2
+
+  http: ^0.13.3
   sqflite: ^2.0.0+4
   path_provider: ^2.0.5
   flutter:
